@@ -70,6 +70,17 @@ trait FlexibleContextInterface
     abstract public function assertPageNotContainsText($text);
 
     /**
+     * Waits for the default `waitFor` time for text to not appear on the page.
+     * This does exactly the same thing as `assertPageNotContainsText` with the only difference being the exception
+     * message considering that this is a `@When` step.
+     *
+     * @see assertPageNotContainsText()
+     * @param  string                $text The text to wait on to not show up on the page anymore.
+     * @throws ResponseTextException If the text is still found after the 30 seconds.
+     */
+    abstract public function waitForPageNotContainsText($text);
+
+    /**
      * This method overrides the MinkContext::assertElementContainsText() default behavior for
      * assertElementContainsText to ensure that it waits for the item to be available with a max time limit.
      *
