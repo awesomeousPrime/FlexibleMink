@@ -100,15 +100,21 @@ class FlexibleContext extends MinkContext
     /**
      * {@inheritdoc}
      *
-     * @When I wait until I do not see :text
+     * @When I wait until I see and then do not see :text
      */
     public function waitForPageNotContainsText($text)
     {
+        $this->waitFor(function () use ($text) {
+            parent::assertPageContainsText($text);
+        }, 15);
+
         try {
-            $this->assertPageNotContainsText($text);
+            $this->waitFor(function () use ($text) {
+                parent::assertPageContainsText($text);
+            }, 15);
         } catch (ExpectationException $e) {
             throw new ResponseTextException(
-                "Wait For timed out waiting for '$text' to no longer appear.", $this->getSession()
+                "Timed out waiting for '$text' to no longer appear.", $this->getSession()
             );
         }
     }
