@@ -3,8 +3,12 @@
 use Behat\FlexibleMink\Context\FlexibleContext;
 use Behat\Mink\Element\DocumentElement;
 use Behat\Mink\Session;
+use InvalidArgumentException;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 
 /**
  * Instantiates the FlexibleContext so it can be used in Unit Tests functions.
@@ -41,5 +45,60 @@ abstract class FlexibleContextTest extends PHPUnit_Framework_TestCase
         $this->pageMock = null;
         $this->sessionMock = null;
         $this->flexible_context = null;
+    }
+
+    /**
+     * Call protected/private method of a class.
+     *
+     * @param object &$object Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array $parameters Array of parameters to pass into method.
+     * @return mixed Method return.
+     * @throws ReflectionException If the class does not exist.
+     */
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
+    {
+        $reflection = new ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * Call protected/private property of a class.
+     *
+     * @param object $object Instantiated object that we will access the property.
+     * @param string $name Name of the property to access.
+     * @return ReflectionProperty
+     * @throws ReflectionException If the class or property does not exist.
+     */
+    public function makePropertyAccessible($object, $name)
+    {
+        if (!property_exists($object, $name)) {
+            throw new InvalidArgumentException(
+                "Property $name does not exists on " . get_class($object) . '.'
+            );
+        }
+
+        $property = new ReflectionProperty($object, $name);
+        $property->setAccessible(true);
+
+        return $property;
+    }
+
+    /**
+     * Set value for protected/private property of a class.
+     *
+     * @param object $object Instantiated object that we will get property from.
+     * @param string $property_name Property name to set
+     * @param mixed $value Property value to set
+     * @throws ReflectionException If the class or property does not exist.
+     */
+    public function setProperty($object, $property_name, $value)
+    {
+        $property = $this->makePropertyAccessible($object, $property_name);
+        $property->setValue($object, $value);
+        $property->setAccessible(false);
     }
 }

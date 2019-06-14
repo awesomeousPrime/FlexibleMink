@@ -1360,11 +1360,12 @@ JS
     private function getListOfAllNodeElementParents(NodeElement $nodeElement, $stopAt)
     {
         $nodeElements = [];
-        while ($nodeElement->getParent() instanceof NodeElement) {
-            $nodeElements[] = ($nodeElement = $nodeElement->getParent());
-            if (strtolower($nodeElement->getTagName()) === strtolower($stopAt)) {
+        while (($parent = $nodeElement->getParent()) instanceof NodeElement) {
+            if (strtolower($parent->getTagName()) === strtolower($stopAt)) {
                 break;
             }
+
+            $nodeElements[] = ($nodeElement = $parent);
         }
 
         return $nodeElements;
